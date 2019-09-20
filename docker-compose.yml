@@ -1,0 +1,13 @@
+version: "3.1"
+
+services:
+  redis:
+    image: redis:alpine
+  xid:
+    build:
+      context: .
+    command: ["-redis-addr=redis:6379", "-model=redis"]
+    ports:
+      - 8080
+    links:
+      - redis
