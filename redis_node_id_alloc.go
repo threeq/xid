@@ -14,7 +14,7 @@ type UnlockFunc func()
 
 const LockKey = "Rds_Xid_Hash_Key_Lock"
 const LockKeyTimeoutMs = 3 * 1000 // 3 秒
-const LockKeyRetryTimes = 50      // 10 次
+const LockKeyRetryTimes = 100     // 100 次
 const RdsXidNodeKey = "Rds_Xid_Node_Key"
 const NodeIdTimeoutSecond = 5 * 60     // 5 分钟
 const NodeIdRefreshTImeSecond = 1 * 60 // 1 分钟

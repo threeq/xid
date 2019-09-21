@@ -27,6 +27,8 @@ func expiredTime(timeoutMs int) (int64, int64) {
 
 // 重试 retry_times 次
 func lockRetry(rds redis.Cmdable, key string, timeoutMs, retryTimes int) (bool, string) {
+	delta := int64((timeoutMs/retryTimes)/2 + 1)
+
 	for i := 0; i < retryTimes; i++ {
 		now, ex := expiredTime(timeoutMs)
 		setNxCmd := rds.SetNX(key, ex, 0)
@@ -53,7 +55,7 @@ func lockRetry(rds redis.Cmdable, key string, timeoutMs, retryTimes int) (bool, 
 				}
 			}
 		}
-		wait := rand.Int63n(100) + 300
+		wait := rand.Int63n(delta) + delta
 		time.Sleep(time.Millisecond * time.Duration(wait))
 	}
 	return false, "0"
