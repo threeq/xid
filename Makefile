@@ -12,6 +12,7 @@ GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 GOTOOL=$(GOCMD) tool
 
+BIN_PATH=bin
 BINARY_NAME=xid
 BINARY_LINUX=$(BINARY_NAME)_linux
 BINARY_MAC=$(BINARY_NAME)_mac
@@ -35,9 +36,10 @@ benchmark:
 clean:
 	$(GOCLEAN)
 	rm -rf $(OUTPUT)
+	rm -rf $(BIN)
 
 build-linux:
-	CGO_ENABLED=0 GOOS=linux   GOARCH=amd64 $(GOBUILD) -o $(OUTPUT)/$(BINARY_LINUX) -v $(SRC)
+	CGO_ENABLED=0 GOOS=linux   GOARCH=amd64 $(GOBUILD) -o $(BIN_PATH)/$(BINARY_LINUX) -v $(SRC)
 build-mac:
 	CGO_ENABLED=0 GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o $(OUTPUT)/$(BINARY_MAC)   -v $(SRC)
 build-win:
