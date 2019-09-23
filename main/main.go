@@ -23,7 +23,6 @@ func main() {
 	stepBits := flag.Uint("step-bits", 6, "")
 	flag.Parse()
 
-	log.Println("启动服务 ...")
 	var nodeAllocation xid.NodeAllocation
 	if *model == "single" {
 		nodeAllocation = xid.NewNodeAllocationSingle()
@@ -34,6 +33,8 @@ func main() {
 	clean := func(ctx context.Context) {
 		nodeAllocation.DestroyNode(ctx)
 	}
+
+	log.Println("启动服务 ...")
 	graceShutdownServe(*webAddr, webapp, clean)
 
 }
