@@ -53,22 +53,22 @@ bin/xid_linux -node-bits=4 -step-bits=7
 
 压测配置
 ```sh
-./wrk/wrk -t1000 -c3000 -d2m --latency http://10.105.55.218:8080
+./wrk/wrk -t32 -c300 --latency http://10.105.55.218:8080
 ```
 
 结果
 ```text
-Running 2m test @ http://10.105.55.218:8080
-  1000 threads and 3000 connections
+Running 10s test @ http://10.105.55.218:8080
+  32 threads and 300 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency    29.66ms   27.34ms 300.99ms   44.86%
-    Req/Sec   112.96     43.77     2.31k    73.34%
+    Latency     2.76ms    2.07ms  34.96ms   70.47%
+    Req/Sec     3.50k   243.75     7.20k    78.05%
   Latency Distribution
-     50%   30.01ms
-     75%   54.76ms
-     90%   65.99ms
-     99%   95.61ms
-  13530842 requests in 2.00m, 1.68GB read
-Requests/sec: 112630.42
-Transfer/sec:     14.29MB
+     50%    2.52ms
+     75%    3.91ms
+     90%    5.26ms
+     99%    9.22ms
+  1123959 requests in 10.10s, 142.56MB read
+Requests/sec: 111284.29
+Transfer/sec:     14.12MB
 ```

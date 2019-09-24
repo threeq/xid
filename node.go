@@ -24,6 +24,14 @@ func ConfigBits(nodeAlloc NodeAllocation, nodeBits, stepBits uint) {
 }
 
 func ConfigCustom(nodeAlloc NodeAllocation, epoch int64, timeUnit Units, nodeBits, stepBits uint) {
+	if nodeBits+stepBits > 22 {
+		log.Fatal("nodeBits + stepBits 超过最大值【22】")
+	}
+
+	if epoch < 0 {
+		log.Fatal("epoch 不能为负数")
+	}
+
 	defaultEpoch = epoch
 	defaultTimeUnit = timeUnit
 	defaultTimeScale = 1000000000 / timeUnit
