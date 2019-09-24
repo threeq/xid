@@ -14,15 +14,6 @@ func init() {
 }
 
 func newApp() http.Handler {
-	//http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-	//	gen := request.FormValue("gen")
-	//	id := xid.MultiIdGenerator(gen)
-	//
-	//	writer.WriteHeader(200)
-	//	_, _ = fmt.Fprint(writer, strconv.FormatInt(id, 10))
-	//})
-	//
-	//graceShutdownServe(addr, http.DefaultServeMux)
 
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
@@ -33,7 +24,13 @@ func newApp() http.Handler {
 		c.String(200, strconv.FormatInt(id, 10))
 	})
 
-	engine.GET("/empty", func(c *gin.Context) {
+	engine.GET("/:gen", func(c *gin.Context) {
+		gen := c.Param("gen")
+		id := xid.MultiIdGenerator(gen).Next()
+		c.String(200, strconv.FormatInt(id, 10))
+	})
+
+	engine.GET("/test/empty", func(c *gin.Context) {
 		c.String(200, "empty")
 	})
 
