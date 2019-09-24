@@ -6,6 +6,7 @@ import (
 	"github.com/threeq/xid"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"

@@ -18,10 +18,10 @@ func TestParse(t *testing.T) {
 		args args
 		want *ID
 	}{
-		{"ok1", args{IdNode.Next()}, &ID{node:1}},
-		{"ok2", args{IdNode.Next()}, &ID{node:1}},
-		{"ok3", args{IdNode.Next()}, &ID{node:1}},
-		{"ok4", args{IdNode.Next()}, &ID{node:1}},
+		{"ok1", args{IdNode.Next()}, &ID{node: 1}},
+		{"ok2", args{IdNode.Next()}, &ID{node: 1}},
+		{"ok3", args{IdNode.Next()}, &ID{node: 1}},
+		{"ok4", args{IdNode.Next()}, &ID{node: 1}},
 	}
 
 	step := 0
@@ -37,5 +37,16 @@ func TestParse(t *testing.T) {
 			}
 		})
 		step++
+	}
+}
+
+func BenchmarkIDGenerator_Next(b *testing.B) {
+	idGen, _ := NewIDGen(0)
+
+	for i := 0; i < b.N; i++ {
+		id := idGen.Next()
+		if id<3 {
+			b.Fatalf("error")
+		}
 	}
 }
