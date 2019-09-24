@@ -12,10 +12,12 @@
 ## 单节点 
 
 ```bash
-docker run -p8080:8080 threewq/xid:1.0.0 -model=single 
+docker run -p8080:8080 threewq/xid:1.0.0
 ```
 
-所有支持参数
+获取 id: GET `http://127.0.0.1:8080`
+
+查看所有支持参数
 
 ```text
 Usage of /app/xid:

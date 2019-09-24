@@ -32,16 +32,18 @@ import (
 type Units = int64
 
 const (
-	SECOND        Units = 1000000000
-	MillCROSECOND Units = 1000000
+	Microsecond    Units = 1000000
+	Microsecond10  Units = 10000000
+	Microsecond100 Units = 100000000
+	Second         Units = 1000000000
 )
 
 var (
 	// Epoch is set to the twitter snowflake epoch of 1970-01-01 08:00:00 UTC in seconds
 	// You may customize this to set a different epoch for your application.
 	defaultEpoch     int64 = 0
-	defaultTimeUnit        = MillCROSECOND
-	defaultTimeScale       = 1000000000 / MillCROSECOND
+	defaultTimeUnit        = Microsecond
+	defaultTimeScale       = 1000000000 / defaultTimeUnit
 
 	//
 	defaultNodeBits uint = 5

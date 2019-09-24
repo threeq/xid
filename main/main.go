@@ -19,6 +19,10 @@ func main() {
 	model := flag.String("model", "single", "运行模式：single 单机 id 生成；redis 使用redis 分布式 id生成")
 	redisAddr := flag.String("redis-addr", "localhost:6379", "redis 地址和端口")
 	redisPwd := flag.String("redis-pwd", "", "redis 密码")
+
+	epoch := flag.Int64("epoch", 0, "开始时间")
+	timeUnitDesc := flag.String("time-unit", "ms", "时间单位: s,ms,10ms,100ms")
+	timeUnit := xid.Microsecond
 	nodeBits := flag.Uint("node-bits", 5, "机器长度")
 	stepBits := flag.Uint("step-bits", 6, "")
 	flag.Parse()
@@ -29,7 +33,21 @@ func main() {
 	} else if *model == "redis" {
 		nodeAllocation = xid.NewNodeAllocationRedis(*redisAddr, *redisPwd)
 	}
-	xid.ConfigBits(nodeAllocation, *nodeBits, *stepBits)
+
+	switch *timeUnitDesc {
+	case "s":
+		timeUnit = xid.Second
+	case "ms":
+		timeUnit = xid.Microsecond
+	case "10ms":
+		timeUnit = xid.Microsecond10
+	case "100ms":
+		timeUnit = xid.Microsecond100
+	default:
+		log.Fatalf("时间单位错误：%s。只接受：s,ms,10ms,100ms", *timeUnitDesc)
+	}
+
+	xid.ConfigCustom(nodeAllocation, *epoch, timeUnit, *nodeBits, *stepBits)
 	clean := func(ctx context.Context) {
 		nodeAllocation.DestroyNode(ctx)
 	}

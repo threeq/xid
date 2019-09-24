@@ -26,7 +26,7 @@ func ConfigBits(nodeAlloc NodeAllocation, nodeBits, stepBits uint) {
 func ConfigCustom(nodeAlloc NodeAllocation, epoch int64, timeUnit Units, nodeBits, stepBits uint) {
 	defaultEpoch = epoch
 	defaultTimeUnit = timeUnit
-	defaultTimeScale = 1000000000 / MillCROSECOND
+	defaultTimeScale = 1000000000 / timeUnit
 	defaultNodeBits = nodeBits
 	defaultStepBits = stepBits
 

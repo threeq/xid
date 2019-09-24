@@ -29,7 +29,7 @@ func TestParse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.want.node = 1
 			tt.want.step = int64(step)
-			tt.want.second = time.Now().UnixNano() / SECOND
+			tt.want.second = time.Now().UnixNano() / Second
 
 			if got := Parse(tt.args.id); !reflect.DeepEqual(got, tt.want) {
 				t.Error(got.time())
