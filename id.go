@@ -2,6 +2,7 @@ package xid
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"sync"
 	"time"
@@ -36,6 +37,12 @@ const (
 	Microsecond10  Units = 10000000
 	Microsecond100 Units = 100000000
 	Second         Units = 1000000000
+
+	/**
+	 * 最大容忍时间, 单位毫秒, 即如果时钟只是回拨了该变量指定的时间, 那么等待相应的时间即可;
+	 * 考虑到服务的高性能, 这个值不易过大
+	 */
+	MaxBackwardMs = 3 * Microsecond
 )
 
 var (
@@ -45,7 +52,6 @@ var (
 	defaultTimeUnit        = Microsecond
 	defaultTimeScale       = 1000000000 / defaultTimeUnit
 
-	//
 	defaultNodeBits uint = 5
 	defaultStepBits uint = 6
 )
@@ -84,6 +90,17 @@ func (n *IDGenerator) Next() int64 {
 
 	now := time.Since(n.epoch).Nanoseconds() / defaultTimeUnit
 
+	//时间回拨处理
+	if now < n.time {
+		// 如果时钟回拨在可接受范围内, 等待即可
+		backwards := (n.time - now) * defaultTimeUnit
+		if backwards < MaxBackwardMs {
+			time.Sleep(time.Duration(backwards))
+		} else {
+			log.Fatalf("clock is moving backwards. Rejecting requests until %d.", n.time)
+		}
+	}
+
 	if now == n.time {
 		n.step = (n.step + 1) & n.stepMask
 
@@ -115,10 +132,6 @@ func NewIDGen(node int64) (*IDGenerator, error) {
 }
 
 func NewIDGenBits(node int64, nodeBits, stepBits uint) (*IDGenerator, error) {
-
-	if node < 0 {
-		panic(errors.New("current node id unset, please set current node id"))
-	}
 
 	n := IDGenerator{}
 	n.node = node

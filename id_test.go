@@ -1,6 +1,7 @@
 package xid
 
 import (
+	"log"
 	"reflect"
 	"testing"
 	"time"
@@ -38,6 +39,19 @@ func TestParse(t *testing.T) {
 		})
 		step++
 	}
+}
+
+func TestIDGenerator_Next(t *testing.T) {
+	defaultEpoch = int64(time.Now().Nanosecond() / 1000000)
+	idGen, _ := NewIDGen(0)
+
+	id := idGen.Next()
+	log.Println(id)
+	log.Printf("%b\n", id)
+	log.Println("1011011010110001100001011111000000101101100000000000")
+	log.Println(len("1011011010110001100001011111000000101101100000000000"))
+
+	log.Println(Parse(id).time())
 }
 
 func BenchmarkIDGenerator_Next(b *testing.B) {
