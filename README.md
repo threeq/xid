@@ -1,6 +1,6 @@
 # xid 
-![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/threewq/xid)(https://cloud.docker.com/repository/docker/threewq/xid/builds)
-![Docker Pulls](https://img.shields.io/docker/pulls/threewq/xid)(https://cloud.docker.com/repository/docker/threewq/xid/tags)
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/threewq/xid)](https://cloud.docker.com/repository/docker/threewq/xid/builds)
+[![Docker Pulls](https://img.shields.io/docker/pulls/threewq/xid)](https://cloud.docker.com/repository/docker/threewq/xid/tags)
 
 分布式 ID 生成工具
 
