@@ -33,6 +33,10 @@ func newApp() http.Handler {
 		c.String(200, strconv.FormatInt(id, 10))
 	})
 
+	engine.GET("/empty", func(c *gin.Context) {
+		c.String(200, "empty")
+	})
+
 	return engine
 
 }
