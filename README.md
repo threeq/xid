@@ -1,4 +1,6 @@
-# xid
+# xid 
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/threewq/xid) 
+![Docker Pulls](https://img.shields.io/docker/pulls/threewq/xid)
 
 分布式 ID 生成工具
 
@@ -12,7 +14,7 @@
 ## 单节点 
 
 ```bash
-docker run -p8080:8080 threewq/xid:1.0.0
+docker run -p8080:8080 threewq/xid:1.1.0
 ```
 
 获取 id: GET `http://127.0.0.1:8080`
@@ -39,7 +41,7 @@ Usage of /app/xid:
 ## 查看所有运行参数
 
 ```bash
-docker run --rm threewq/xid:1.0.0 -h
+docker run --rm threewq/xid -h
 ```
 
 # 性能测试

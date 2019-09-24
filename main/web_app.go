@@ -24,7 +24,7 @@ func newApp() http.Handler {
 		c.String(200, strconv.FormatInt(id, 10))
 	})
 
-	engine.GET("/:gen", func(c *gin.Context) {
+	engine.GET("/gen/:gen", func(c *gin.Context) {
 		gen := c.Param("gen")
 		id := xid.MultiIdGenerator(gen).Next()
 		c.String(200, strconv.FormatInt(id, 10))
