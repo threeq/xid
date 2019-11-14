@@ -13,7 +13,7 @@
 ## 单节点 
 
 ```bash
-docker run -p8080:8080 threewq/xid:1.1.0
+docker run -p8080:8080 threewq/xid
 ```
 
 获取 id: 
