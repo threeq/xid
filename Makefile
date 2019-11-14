@@ -41,9 +41,9 @@ clean:
 build-linux:
 	CGO_ENABLED=0 GOOS=linux   GOARCH=amd64 $(GOBUILD) -o $(BIN_PATH)/$(BINARY_LINUX) -v $(SRC)
 build-mac:
-	CGO_ENABLED=0 GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o $(OUTPUT)/$(BINARY_MAC)   -v $(SRC)
+	CGO_ENABLED=0 GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o $(BIN_PATH)/$(BINARY_MAC)   -v $(SRC)
 build-win:
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(OUTPUT)/$(BINARY_WIN)   -v $(SRC)
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BIN_PATH)/$(BINARY_WIN)   -v $(SRC)
 
 build-all: clean build-linux build-mac build-win
 	echo 'build completed.'

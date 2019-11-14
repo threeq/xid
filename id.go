@@ -2,7 +2,6 @@ package xid
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strconv"
 	"sync"
