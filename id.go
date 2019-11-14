@@ -2,6 +2,7 @@ package xid
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 	"sync"
@@ -134,6 +135,7 @@ func NewIDGen(node int64) (*IDGenerator, error) {
 func NewIDGenBits(node int64, nodeBits, stepBits uint) (*IDGenerator, error) {
 
 	n := IDGenerator{}
+	n.time = 0
 	n.node = node
 	n.nodeBits = nodeBits
 	n.stepBits = stepBits
@@ -149,7 +151,7 @@ func NewIDGenBits(node int64, nodeBits, stepBits uint) (*IDGenerator, error) {
 
 	var curTime = time.Now()
 	// add time.Duration to curTime to make sure we use the monotonic clock if available
-	n.epoch = curTime.Add(time.Unix(defaultEpoch/defaultTimeScale, defaultEpoch*defaultTimeUnit).Sub(curTime))
+	n.epoch = curTime.Add(time.Unix(defaultEpoch, 0).Sub(curTime))
 
 	return &n, nil
 }

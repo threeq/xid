@@ -20,7 +20,7 @@ func main() {
 	redisAddr := flag.String("redis-addr", "localhost:6379", "redis 地址和端口")
 	redisPwd := flag.String("redis-pwd", "", "redis 密码")
 
-	epoch := flag.Int64("epoch", 0, "开始时间")
+	epoch := flag.Int64("epoch", 0, "开始时间（秒）")
 	timeUnitDesc := flag.String("time-unit", "ms", "时间单位: s,ms,10ms,100ms")
 	timeUnit := xid.Microsecond
 	nodeBits := flag.Uint("node-bits", 5, "机器长度")

@@ -25,6 +25,8 @@ docker run -p8080:8080 threewq/xid:1.1.0
 
 ```text
 Usage of /app/xid:
+  -epoch int
+        开始时间（秒）
   -model string
         运行模式：single 单机 id 生成；redis 使用redis 分布式 id生成 (default "single")
   -node-bits uint
@@ -35,6 +37,8 @@ Usage of /app/xid:
         redis 密码
   -step-bits uint
          (default 6)
+  -time-unit string
+        时间单位: s,ms,10ms,100ms (default "ms")
   -web-addr string
         web 监听地址和端口 (default ":8080")
 
