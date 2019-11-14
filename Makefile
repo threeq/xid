@@ -51,16 +51,21 @@ build-all: clean build-linux build-mac build-win
 # docker-build:
 #	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/$(SRC) golang:latest go build -o "$(BINARY_UNIX)" -v
 
-deploy: clean build-linux
+tag: clean build-linux
 	git add .
 	git commit -am "deploy version $(VERSION)"
 	git push origin master
 	git tag -a $(VERSION) -m"deploy version $(VERSION)"
 	git push --tags
+
+push:
 	docker build . -t threewq/xid:latest
 	docker tag threewq/xid:latest threewq/xid:$(VERSION)
 	docker push threewq/xid:latest
 	docker push threewq/xid:$(VERSION)
+
+deploy: tag push
+	echo 'deploy completed'
 
 stat: cloc gocyclo
 	@echo "代码行数统计"
