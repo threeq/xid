@@ -1,6 +1,7 @@
 package xid
 
 import (
+	"fmt"
 	"log"
 	"reflect"
 	"testing"
@@ -33,7 +34,7 @@ func TestParse(t *testing.T) {
 			tt.want.second = time.Now().UnixNano() / Second
 
 			if got := Parse(tt.args.id); !reflect.DeepEqual(got, tt.want) {
-				t.Error(got.time())
+				t.Error(got.time(0))
 				t.Errorf("Parse() = %v, want %v", got, tt.want)
 			}
 		})
@@ -51,7 +52,7 @@ func TestIDGenerator_Next(t *testing.T) {
 	log.Println("1011011010110001100001011111000000101101100000000000")
 	log.Println(len("1011011010110001100001011111000000101101100000000000"))
 
-	log.Println(Parse(id).time())
+	log.Println(Parse(id).time(0))
 }
 
 func BenchmarkIDGenerator_Next(b *testing.B) {
@@ -63,4 +64,10 @@ func BenchmarkIDGenerator_Next(b *testing.B) {
 			b.Fatalf("error")
 		}
 	}
+}
+
+func TestParse2(t *testing.T) {
+	idNum := Parse(100632443644096)
+	println(fmt.Sprintf("%+v", idNum))
+	println(idNum.time(1546272000))
 }
