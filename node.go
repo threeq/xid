@@ -14,7 +14,7 @@ type NodeAllocation interface {
 var mu sync.Mutex
 var curNodeId = -1
 var idGenerators = map[string]IDGen{}
-var genFactory = NewIDGen
+var genFactory = NewIDSnakeGen
 
 func Config(mode string, nodeAlloc NodeAllocation) {
 	ConfigCustom(mode, nodeAlloc, defaultEpoch, defaultTimeUnit, defaultNodeBits, defaultStepBits)
@@ -39,10 +39,10 @@ func ConfigCustom(mode string, nodeAlloc NodeAllocation, epoch int64, timeUnit U
 	defaultNodeBits = nodeBits
 	defaultStepBits = stepBits
 
-	if mode == "id" {
+	if mode == "snake" {
 		nodeMax := -1 ^ (-1 << nodeBits)
 		curNodeId = nodeAlloc.Node(nodeMax)
-		genFactory = NewIDGen
+		genFactory = NewIDSnakeGen
 	} else {
 		nodeMax := 10
 		curNodeId = nodeAlloc.Node(nodeMax)

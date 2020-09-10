@@ -56,19 +56,19 @@ var (
 	defaultStepBits uint = 6
 )
 
-type ID struct {
+type SnakeID struct {
 	second int64
 	node   int64
 	step   int64
 }
 
 // 输出时间，格式：2006-01-02 15:04:05
-func (id *ID) time(epoch int64) string {
+func (id *SnakeID) time(epoch int64) string {
 	tm := time.Unix(id.second+epoch, 0)
 	return tm.Format("2006-01-02 15:04:05")
 }
 
-type IDGenerator struct {
+type IDSnakeGenerator struct {
 	mu       sync.Mutex
 	epoch    time.Time
 	nodeBits uint
@@ -85,7 +85,7 @@ type IDGenerator struct {
 	nodeShift uint
 }
 
-func (n *IDGenerator) Next() int64 {
+func (n *IDSnakeGenerator) Next() int64 {
 	n.mu.Lock()
 
 	now := time.Since(n.epoch).Nanoseconds() / defaultTimeUnit
@@ -123,17 +123,17 @@ func (n *IDGenerator) Next() int64 {
 	return id
 }
 
-func (n *IDGenerator) Parse(id int64) *ID {
+func (n *IDSnakeGenerator) Parse(id int64) *SnakeID {
 	return ParseByBits(id, n.nodeBits, n.stepBits)
 }
 
-func NewIDGen(node int) (IDGen, error) {
-	return NewIDGenBits(int64(node), defaultNodeBits, defaultStepBits)
+func NewIDSnakeGen(node int) (IDGen, error) {
+	return NewIDSnakeGenBits(int64(node), defaultNodeBits, defaultStepBits)
 }
 
-func NewIDGenBits(node int64, nodeBits, stepBits uint) (*IDGenerator, error) {
+func NewIDSnakeGenBits(node int64, nodeBits, stepBits uint) (*IDSnakeGenerator, error) {
 
-	n := IDGenerator{}
+	n := IDSnakeGenerator{}
 	n.time = 0
 	n.node = node
 	n.nodeBits = nodeBits
@@ -145,7 +145,7 @@ func NewIDGenBits(node int64, nodeBits, stepBits uint) (*IDGenerator, error) {
 	n.nodeShift = stepBits
 
 	if n.node < 0 || n.node > n.nodeMax {
-		return nil, errors.New("IDGenerator number must be between 0 and " + strconv.FormatInt(n.nodeMax, 10))
+		return nil, errors.New("IDSnakeGenerator number must be between 0 and " + strconv.FormatInt(n.nodeMax, 10))
 	}
 
 	var curTime = time.Now()
@@ -155,16 +155,16 @@ func NewIDGenBits(node int64, nodeBits, stepBits uint) (*IDGenerator, error) {
 	return &n, nil
 }
 
-func Parse(id int64) *ID {
+func Parse(id int64) *SnakeID {
 	return ParseByBits(id, defaultNodeBits, defaultStepBits)
 }
 
-func ParseByBits(id int64, nodeBits, stepBits uint) *ID {
+func ParseByBits(id int64, nodeBits, stepBits uint) *SnakeID {
 
 	var nodeMask int64 = -1 ^ (-1 << nodeBits)
 	var stepMask int64 = -1 ^ (-1 << stepBits)
 
-	return &ID{
+	return &SnakeID{
 		second: (id >> (nodeBits + stepBits)) / defaultTimeScale,
 		node:   (id >> stepBits) & nodeMask,
 		step:   id & stepMask,

@@ -24,13 +24,17 @@ docker run -p8080:8080 threewq/xid
 查看所有支持参数
 
 ```text
-Usage of /app/xid:
+Usage of ./bin/xid_mac:
   -epoch int
         开始时间（秒）
+  -mode string
+        id 生成模式【snake / id14】 (default "snake")
   -model string
         运行模式：single 单机 id 生成；redis 使用redis 分布式 id生成 (default "single")
   -node-bits uint
         机器长度 (default 5)
+  -path string
+        访问路径 (default "/")
   -redis-addr string
         redis 地址和端口 (default "localhost:6379")
   -redis-pwd string

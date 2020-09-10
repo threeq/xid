@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	mode := flag.String("mode", "id", "id 生成模式 id、id14")
+	mode := flag.String("mode", "snake", "id 生成模式【snake / id14】")
 	basePath := flag.String("path", "/", "访问路径")
 	webAddr := flag.String("web-addr", ":8080", "web 监听地址和端口")
 	model := flag.String("model", "single", "运行模式：single 单机 id 生成；redis 使用redis 分布式 id生成")
@@ -27,6 +27,7 @@ func main() {
 	stepBits := flag.Uint("step-bits", 6, "")
 	flag.Parse()
 
+	log.Println("运行模式：", *mode)
 	var nodeAllocation xid.NodeAllocation
 	if *model == "single" {
 		nodeAllocation = xid.NewNodeAllocationSingle()

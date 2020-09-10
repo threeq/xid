@@ -10,7 +10,7 @@ import (
 
 func TestParse(t *testing.T) {
 
-	var IdNode, _ = NewIDGen(1)
+	var IdNode, _ = NewIDSnakeGen(1)
 
 	type args struct {
 		id int64
@@ -18,12 +18,12 @@ func TestParse(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *ID
+		want *SnakeID
 	}{
-		{"ok1", args{IdNode.Next()}, &ID{node: 1}},
-		{"ok2", args{IdNode.Next()}, &ID{node: 1}},
-		{"ok3", args{IdNode.Next()}, &ID{node: 1}},
-		{"ok4", args{IdNode.Next()}, &ID{node: 1}},
+		{"ok1", args{IdNode.Next()}, &SnakeID{node: 1}},
+		{"ok2", args{IdNode.Next()}, &SnakeID{node: 1}},
+		{"ok3", args{IdNode.Next()}, &SnakeID{node: 1}},
+		{"ok4", args{IdNode.Next()}, &SnakeID{node: 1}},
 	}
 
 	step := 0
@@ -42,9 +42,9 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestIDGenerator_Next(t *testing.T) {
+func TestIDSnakeGenerator_Next(t *testing.T) {
 	defaultEpoch = int64(time.Now().Nanosecond() / 1000000)
-	idGen, _ := NewIDGen(0)
+	idGen, _ := NewIDSnakeGen(0)
 
 	id := idGen.Next()
 	log.Println(id)
@@ -55,8 +55,8 @@ func TestIDGenerator_Next(t *testing.T) {
 	log.Println(Parse(id).time(0))
 }
 
-func BenchmarkIDGenerator_Next(b *testing.B) {
-	idGen, _ := NewIDGen(0)
+func BenchmarkIDSnakeGenerator_Next(b *testing.B) {
+	idGen, _ := NewIDSnakeGen(0)
 
 	for i := 0; i < b.N; i++ {
 		id := idGen.Next()
