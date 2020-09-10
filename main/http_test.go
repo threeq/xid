@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"github.com/threeq/xid"
 	"log"
 	"net/http"
@@ -21,7 +22,7 @@ func idHttpFunc(writer http.ResponseWriter, request *http.Request) {
 }
 
 func Test_routers(t *testing.T) {
-	xid.Config(xid.NewNodeAllocationSingle())
+	xid.Config("id",xid.NewNodeAllocationSingle())
 
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
@@ -34,7 +35,7 @@ func Test_routers(t *testing.T) {
 }
 
 func Benchmark_routers(b *testing.B) {
-	xid.Config(xid.NewNodeAllocationSingle())
+	xid.Config("id",xid.NewNodeAllocationSingle())
 
 	for i := 0; i < b.N; i++ {
 		r := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -49,15 +50,15 @@ func Benchmark_routers(b *testing.B) {
 }
 
 func Test_gin(t *testing.T)  {
-	xid.Config(xid.NewNodeAllocationSingle())
+	xid.Config("id14",xid.NewNodeAllocationSingle())
 
-	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r := httptest.NewRequest(http.MethodGet, "/id14", nil)
 	w := httptest.NewRecorder()
 
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()
 	engine.Use(gin.Recovery())
-	engine.GET("/", func(c *gin.Context) {
+	engine.GET("/id14", func(c *gin.Context) {
 		gen := c.Query("gen")
 		id := xid.MultiIdGenerator(gen).Next()
 		c.String(200, strconv.FormatInt(id, 10))
@@ -67,11 +68,12 @@ func Test_gin(t *testing.T)  {
 
 	id, _ := strconv.ParseUint(w.Body.String(), 10, 64)
 
-	log.Println(id)
+	log.Println(id, fmt.Sprintf("len=%d", len(fmt.Sprintf("%d", id))))
+	assert.Equal(t, len(fmt.Sprintf("%d", id)), 14)
 }
 
 func Benchmark_gin(b *testing.B) {
-	xid.Config(xid.NewNodeAllocationSingle())
+	xid.Config("id",xid.NewNodeAllocationSingle())
 
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()

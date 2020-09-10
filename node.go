@@ -7,23 +7,24 @@ import (
 )
 
 type NodeAllocation interface {
-	Node(nodeMax int) int64
+	Node(nodeMax int) int
 	DestroyNode(timeoutCtx context.Context)
 }
 
 var mu sync.Mutex
-var curNodeId int64 = -1
-var idGenerators = map[string]*IDGenerator{}
+var curNodeId = -1
+var idGenerators = map[string]IDGen{}
+var genFactory = NewIDGen
 
-func Config(nodeAlloc NodeAllocation) {
-	ConfigCustom(nodeAlloc, defaultEpoch, defaultTimeUnit, defaultNodeBits, defaultStepBits)
+func Config(mode string, nodeAlloc NodeAllocation) {
+	ConfigCustom(mode, nodeAlloc, defaultEpoch, defaultTimeUnit, defaultNodeBits, defaultStepBits)
 }
 
-func ConfigBits(nodeAlloc NodeAllocation, nodeBits, stepBits uint) {
-	ConfigCustom(nodeAlloc, defaultEpoch, defaultTimeUnit, nodeBits, stepBits)
+func ConfigBits(mode string, nodeAlloc NodeAllocation, nodeBits, stepBits uint) {
+	ConfigCustom(mode, nodeAlloc, defaultEpoch, defaultTimeUnit, nodeBits, stepBits)
 }
 
-func ConfigCustom(nodeAlloc NodeAllocation, epoch int64, timeUnit Units, nodeBits, stepBits uint) {
+func ConfigCustom(mode string, nodeAlloc NodeAllocation, epoch int64, timeUnit Units, nodeBits, stepBits uint) {
 	if nodeBits+stepBits > 22 {
 		log.Fatal("nodeBits + stepBits 超过最大值【22】")
 	}
@@ -38,12 +39,20 @@ func ConfigCustom(nodeAlloc NodeAllocation, epoch int64, timeUnit Units, nodeBit
 	defaultNodeBits = nodeBits
 	defaultStepBits = stepBits
 
-	nodeMax := -1 ^ (-1 << nodeBits)
-	curNodeId = nodeAlloc.Node(nodeMax)
+	if mode == "id" {
+		nodeMax := -1 ^ (-1 << nodeBits)
+		curNodeId = nodeAlloc.Node(nodeMax)
+		genFactory = NewIDGen
+	} else {
+		nodeMax := 10
+		curNodeId = nodeAlloc.Node(nodeMax)
+		genFactory = NewID14Gen
+	}
+
 	log.Printf("current node id is: %d", curNodeId)
 }
 
-func MultiIdGenerator(gen string) *IDGenerator {
+func MultiIdGenerator(gen string) IDGen {
 	if idGen, ok := idGenerators[gen]; ok {
 		return idGen
 	}
@@ -52,7 +61,8 @@ func MultiIdGenerator(gen string) *IDGenerator {
 		mu.Unlock()
 		return idGen
 	}
-	idGen, _ := NewIDGen(curNodeId)
+	idGen, _ := genFactory(curNodeId)
+
 	idGenerators[gen] = idGen
 	mu.Unlock()
 	return idGen

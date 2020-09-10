@@ -12,9 +12,9 @@ import (
 	"time"
 )
 
-var webapp http.Handler
-
 func main() {
+	mode := flag.String("mode", "id", "id 生成模式 id、id14")
+	basePath := flag.String("path", "/", "访问路径")
 	webAddr := flag.String("web-addr", ":8080", "web 监听地址和端口")
 	model := flag.String("model", "single", "运行模式：single 单机 id 生成；redis 使用redis 分布式 id生成")
 	redisAddr := flag.String("redis-addr", "localhost:6379", "redis 地址和端口")
@@ -47,13 +47,13 @@ func main() {
 		log.Fatalf("时间单位错误：%s。只接受：s,ms,10ms,100ms", *timeUnitDesc)
 	}
 
-	xid.ConfigCustom(nodeAllocation, *epoch, timeUnit, *nodeBits, *stepBits)
+	xid.ConfigCustom(*mode, nodeAllocation, *epoch, timeUnit, *nodeBits, *stepBits)
 	clean := func(ctx context.Context) {
 		nodeAllocation.DestroyNode(ctx)
 	}
 
 	log.Println("启动服务 ...")
-	graceShutdownServe(*webAddr, webapp, clean)
+	graceShutdownServe(*webAddr, newIDApp(*basePath), clean)
 
 }
 

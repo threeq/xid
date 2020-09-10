@@ -21,14 +21,14 @@ const NodeIdRefreshTImeSecond = 3  // 3 秒
 
 type redisNodeIdAllocation struct {
 	rds      *redis.Client
-	nodeId   int64
+	nodeId   int
 	shutdown chan interface{}
 	ctx      context.Context
 	canceler context.CancelFunc
 }
 
-func (alloc *redisNodeIdAllocation) Node(nodeMax int) int64 {
-	if alloc.nodeId >= 0 && alloc.nodeId <= int64(nodeMax) {
+func (alloc *redisNodeIdAllocation) Node(nodeMax int) int {
+	if alloc.nodeId >= 0 && alloc.nodeId <= nodeMax {
 		return alloc.nodeId
 	}
 
@@ -38,7 +38,7 @@ func (alloc *redisNodeIdAllocation) Node(nodeMax int) int64 {
 	startNodeId := rand.Intn(nodeCount)
 	r := alloc.rds.HSetNX(RdsXidNodeKey, string(startNodeId), time.Now().Unix())
 	if r.Val() {
-		alloc.nodeId = int64(startNodeId)
+		alloc.nodeId = startNodeId
 		alloc.capture()
 		return alloc.nodeId
 	}
@@ -62,7 +62,7 @@ func (alloc *redisNodeIdAllocation) Node(nodeMax int) int64 {
 			r := alloc.rds.HSetNX(RdsXidNodeKey, string(tryNodeId), time.Now().Unix())
 			if r.Val() {
 				unlock()
-				alloc.nodeId = int64(tryNodeId)
+				alloc.nodeId = tryNodeId
 				alloc.capture()
 				return alloc.nodeId
 			}
@@ -86,7 +86,7 @@ func (alloc *redisNodeIdAllocation) capture() {
 	go refreshNodeStatus(alloc.ctx, alloc.rds, alloc.nodeId, alloc.shutdown)
 }
 
-func refreshNodeStatus(ctx context.Context, client *redis.Client, nodeId int64, done chan interface{}) {
+func refreshNodeStatus(ctx context.Context, client *redis.Client, nodeId int, done chan interface{}) {
 	d := time.Duration(time.Second * NodeIdRefreshTImeSecond)
 	t := time.NewTicker(d)
 

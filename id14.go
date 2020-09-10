@@ -22,7 +22,8 @@ type ID14Generator struct {
 	node  int
 }
 
-// -10- | -1- | -3-  // 260年，10000/s
+// ---10--- | ---1--- | ---3---  // 260年，10000/s【最大时间 9999999999 => 2286-11-21 01:46:39】
+// 时间戳(s) | 机器 id  |  计数器
 func (g *ID14Generator) Next() int64 {
 	g.mu.Lock()
 	now := time.Now().Unix()
@@ -43,9 +44,13 @@ func (g *ID14Generator) Next() int64 {
 	num := fmt.Sprintf("%010d%d%03d", now, g.node, g.step)
 
 	n, err := strconv.ParseInt(num, 10, 64)
-	if err!=nil {
+	if err != nil {
 		panic(err)
 	}
 	g.mu.Unlock()
 	return n
+}
+
+func NewID14Gen(node int) (IDGen, error) {
+	return &ID14Generator{node: node}, nil
 }
