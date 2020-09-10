@@ -3,6 +3,7 @@ package xid
 import (
 	"fmt"
 	"gopkg.in/go-playground/assert.v1"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -24,7 +25,31 @@ func TestID14Generator_Next(t *testing.T) {
 
 func BenchmarkID14Generator_Next(b *testing.B) {
 	g := ID14Generator{}
-	for i := 0; i <b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		fmt.Println(g.Next())
+	}
+}
+
+func TestAlgEqual(t *testing.T) {
+	num := fmt.Sprintf("%010d%d%03d", 1599749011, 1, 49)
+
+	n0, _ := strconv.ParseInt(num, 10, 64)
+	n1 := int64(1599749011*10000 + 1*1000 + 49)
+	fmt.Println(n0)
+	fmt.Println(n1)
+	assert.Equal(t, n0, n1)
+}
+
+func BenchmarkID14Generator_AlgStr(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		num := fmt.Sprintf("%010d%d%03d", 1599749011, 1, 49)
+
+		_, _ = strconv.ParseInt(num, 10, 64)
+	}
+}
+
+func BenchmarkID14Generator_AlgM(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = int64(1599749011)*10000 + int64(1)*1000 + int64(49)
 	}
 }

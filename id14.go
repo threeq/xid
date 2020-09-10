@@ -1,9 +1,7 @@
 package xid
 
 import (
-	"fmt"
 	"math/rand"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -17,9 +15,9 @@ const MAX = 1000
 type ID14Generator struct {
 	mu    sync.Mutex
 	time  int64
-	start int
-	step  int
-	node  int
+	start int64
+	step  int64
+	node  int64
 }
 
 // ---10--- | ---1--- | ---3---  // 260年，10000/s【最大时间 9999999999 => 2286-11-21 01:46:39】
@@ -33,24 +31,19 @@ func (g *ID14Generator) Next() int64 {
 			for now <= g.time {
 				now = time.Now().Unix()
 			}
-			g.start = rand.Intn(1000)
+			g.start = int64(rand.Intn(1000))
 			g.step = g.start
 		}
 	} else {
-		g.start = rand.Intn(1000)
+		g.start = int64(rand.Intn(1000))
 		g.step = g.start
 	}
 	g.time = now
-	num := fmt.Sprintf("%010d%d%03d", now, g.node, g.step)
-
-	n, err := strconv.ParseInt(num, 10, 64)
-	if err != nil {
-		panic(err)
-	}
+	n := now*10000 + g.node*1000 + g.step
 	g.mu.Unlock()
 	return n
 }
 
 func NewID14Gen(node int) (IDGen, error) {
-	return &ID14Generator{node: node}, nil
+	return &ID14Generator{node: int64(node)}, nil
 }
