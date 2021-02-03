@@ -15,17 +15,17 @@ type UnlockFunc func()
 const LockKey = "Rds_Xid_Hash_Key_Lock"
 const LockKeyTimeoutMs = 3 * 1000 // 3 秒
 const LockKeyRetryTimes = 100     // 100 次
-const RdsXidNodeKey = "Rds_Xid_Node_Key_"
-const NodeIdTimeoutSecond = 5 * 60 // 5 分钟
-const NodeIdRefreshTImeSecond = 3  // 3 秒
+const RdsXidNodesHash = "Rds_Xid_Node_Key_"
+const NodeIdRefreshTImeSecond = 6 // 3 秒
 
 type redisNodeIdAllocation struct {
-	rds           *redis.Client
-	rdsXidNodeKey string
-	nodeId        int
-	shutdown      chan interface{}
-	ctx           context.Context
-	canceler      context.CancelFunc
+	rds             *redis.Client
+	rdsXidNodesHash string
+	nodeId          int
+	//salt            string
+	shutdown chan interface{}
+	ctx      context.Context
+	canceler context.CancelFunc
 }
 
 func (alloc *redisNodeIdAllocation) Node(mode string, nodeMax int) int {
@@ -33,12 +33,13 @@ func (alloc *redisNodeIdAllocation) Node(mode string, nodeMax int) int {
 		return alloc.nodeId
 	}
 
-	alloc.rdsXidNodeKey = RdsXidNodeKey + mode
+	//alloc.salt = uuid.NewV4().String()
+	alloc.rdsXidNodesHash = RdsXidNodesHash + mode
 	nodeCount := nodeMax + 1
 	// 为了尽量减少冲突，先随机获取一次 nodeId，不过失败在再逐个尝试
 	rand.Seed(time.Now().UnixNano())
 	startNodeId := rand.Intn(nodeCount)
-	r := alloc.rds.HSetNX(alloc.rdsXidNodeKey, string(startNodeId), time.Now().Unix())
+	r := alloc.rds.HSetNX(alloc.rdsXidNodesHash, nodeKey(startNodeId), time.Now().Unix())
 	if r.Val() {
 		alloc.nodeId = startNodeId
 		alloc.capture()
@@ -56,12 +57,12 @@ func (alloc *redisNodeIdAllocation) Node(mode string, nodeMax int) int {
 		if err != nil {
 			panic(err)
 		}
-		exist, _ := alloc.rds.HGet(alloc.rdsXidNodeKey, string(tryNodeId)).Int64()
+		exist, _ := alloc.rds.HGet(alloc.rdsXidNodesHash, nodeKey(tryNodeId)).Int64()
 		now := time.Now().Unix()
 		log.Println("check id ", now-exist, tryNodeId)
-		if (now - exist) > NodeIdTimeoutSecond {
-			alloc.rds.HDel(alloc.rdsXidNodeKey, string(tryNodeId))
-			r := alloc.rds.HSetNX(alloc.rdsXidNodeKey, string(tryNodeId), time.Now().Unix())
+		if (now - exist) > NodeIdRefreshTImeSecond*10 {
+			alloc.rds.HDel(alloc.rdsXidNodesHash, nodeKey(tryNodeId))
+			r := alloc.rds.HSetNX(alloc.rdsXidNodesHash, nodeKey(tryNodeId), time.Now().Unix())
 			if r.Val() {
 				unlock()
 				alloc.nodeId = tryNodeId
@@ -98,10 +99,10 @@ func refreshNodeStatus(ctx context.Context, alloc *redisNodeIdAllocation, nodeId
 		case _, _ = <-t.C:
 			now := time.Now().Unix()
 			log.Printf("refresh id [%d] activity time to %d", nodeId, now)
-			client.HSetNX(alloc.rdsXidNodeKey, string(nodeId), now)
+			client.HSet(alloc.rdsXidNodesHash, nodeKey(nodeId), now)
 		case <-ctx.Done():
 			t.Stop()
-			client.HDel(alloc.rdsXidNodeKey, string(nodeId))
+			client.HDel(alloc.rdsXidNodesHash, nodeKey(nodeId))
 			_ = client.Close()
 			log.Println(fmt.Sprintf("delete node id %d", nodeId))
 			done <- 1
@@ -115,7 +116,7 @@ func NewNodeAllocationRedis(redisAddr, redisPwd string) *redisNodeIdAllocation {
 	rds := redis.NewClient(&redis.Options{
 		Addr:     redisAddr,
 		Password: redisPwd, // no password set
-		DB:       0,        // use default DB
+		DB:       15,       // use default DB
 		PoolSize: 2,
 	})
 
@@ -134,4 +135,8 @@ func NewNodeAllocationRedis(redisAddr, redisPwd string) *redisNodeIdAllocation {
 		canceler: canceler,
 		shutdown: done,
 	}
+}
+
+func nodeKey(id int) string {
+	return "node-" + string(id)
 }

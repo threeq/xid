@@ -2,6 +2,7 @@ package xid
 
 import (
 	"fmt"
+	uuid "github.com/satori/go.uuid"
 	"gopkg.in/go-playground/assert.v1"
 	"strconv"
 	"testing"
@@ -52,4 +53,8 @@ func BenchmarkID14Generator_AlgM(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = int64(1599749011)*10000 + int64(1)*1000 + int64(49)
 	}
+}
+
+func TestUuid(t *testing.T) {
+	fmt.Println(uuid.NewV4().String())
 }
