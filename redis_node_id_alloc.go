@@ -15,28 +15,30 @@ type UnlockFunc func()
 const LockKey = "Rds_Xid_Hash_Key_Lock"
 const LockKeyTimeoutMs = 3 * 1000 // 3 秒
 const LockKeyRetryTimes = 100     // 100 次
-const RdsXidNodeKey = "Rds_Xid_Node_Key"
+const RdsXidNodeKey = "Rds_Xid_Node_Key_"
 const NodeIdTimeoutSecond = 5 * 60 // 5 分钟
 const NodeIdRefreshTImeSecond = 3  // 3 秒
 
 type redisNodeIdAllocation struct {
-	rds      *redis.Client
-	nodeId   int
-	shutdown chan interface{}
-	ctx      context.Context
-	canceler context.CancelFunc
+	rds           *redis.Client
+	rdsXidNodeKey string
+	nodeId        int
+	shutdown      chan interface{}
+	ctx           context.Context
+	canceler      context.CancelFunc
 }
 
-func (alloc *redisNodeIdAllocation) Node(nodeMax int) int {
+func (alloc *redisNodeIdAllocation) Node(mode string, nodeMax int) int {
 	if alloc.nodeId >= 0 && alloc.nodeId <= nodeMax {
 		return alloc.nodeId
 	}
 
+	alloc.rdsXidNodeKey = RdsXidNodeKey + mode
 	nodeCount := nodeMax + 1
 	// 为了尽量减少冲突，先随机获取一次 nodeId，不过失败在再逐个尝试
 	rand.Seed(time.Now().UnixNano())
 	startNodeId := rand.Intn(nodeCount)
-	r := alloc.rds.HSetNX(RdsXidNodeKey, string(startNodeId), time.Now().Unix())
+	r := alloc.rds.HSetNX(alloc.rdsXidNodeKey, string(startNodeId), time.Now().Unix())
 	if r.Val() {
 		alloc.nodeId = startNodeId
 		alloc.capture()
@@ -54,12 +56,12 @@ func (alloc *redisNodeIdAllocation) Node(nodeMax int) int {
 		if err != nil {
 			panic(err)
 		}
-		exist, _ := alloc.rds.HGet(RdsXidNodeKey, string(tryNodeId)).Int64()
+		exist, _ := alloc.rds.HGet(alloc.rdsXidNodeKey, string(tryNodeId)).Int64()
 		now := time.Now().Unix()
 		log.Println("check id ", now-exist, tryNodeId)
 		if (now - exist) > NodeIdTimeoutSecond {
-			alloc.rds.HDel(RdsXidNodeKey, string(tryNodeId))
-			r := alloc.rds.HSetNX(RdsXidNodeKey, string(tryNodeId), time.Now().Unix())
+			alloc.rds.HDel(alloc.rdsXidNodeKey, string(tryNodeId))
+			r := alloc.rds.HSetNX(alloc.rdsXidNodeKey, string(tryNodeId), time.Now().Unix())
 			if r.Val() {
 				unlock()
 				alloc.nodeId = tryNodeId
@@ -83,11 +85,12 @@ func (alloc *redisNodeIdAllocation) DestroyNode(timeoutCtx context.Context) {
 }
 
 func (alloc *redisNodeIdAllocation) capture() {
-	go refreshNodeStatus(alloc.ctx, alloc.rds, alloc.nodeId, alloc.shutdown)
+	go refreshNodeStatus(alloc.ctx, alloc, alloc.nodeId, alloc.shutdown)
 }
 
-func refreshNodeStatus(ctx context.Context, client *redis.Client, nodeId int, done chan interface{}) {
-	d := time.Duration(time.Second * NodeIdRefreshTImeSecond)
+func refreshNodeStatus(ctx context.Context, alloc *redisNodeIdAllocation, nodeId int, done chan interface{}) {
+	client := alloc.rds
+	d := time.Second * NodeIdRefreshTImeSecond
 	t := time.NewTicker(d)
 
 	for {
@@ -95,10 +98,10 @@ func refreshNodeStatus(ctx context.Context, client *redis.Client, nodeId int, do
 		case _, _ = <-t.C:
 			now := time.Now().Unix()
 			log.Printf("refresh id [%d] activity time to %d", nodeId, now)
-			client.HSetNX(RdsXidNodeKey, string(nodeId), now)
+			client.HSetNX(alloc.rdsXidNodeKey, string(nodeId), now)
 		case <-ctx.Done():
 			t.Stop()
-			client.HDel(RdsXidNodeKey, string(nodeId))
+			client.HDel(alloc.rdsXidNodeKey, string(nodeId))
 			_ = client.Close()
 			log.Println(fmt.Sprintf("delete node id %d", nodeId))
 			done <- 1

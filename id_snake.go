@@ -2,6 +2,7 @@ package xid
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 	"sync"
@@ -43,7 +44,7 @@ const (
 	 * 最大容忍时间, 单位毫秒, 即如果时钟只是回拨了该变量指定的时间, 那么等待相应的时间即可;
 	 * 考虑到服务的高性能, 这个值不易过大
 	 */
-	MaxBackwardMs = 3 * Microsecond
+	MaxBackwardMs = 30 * Microsecond
 )
 
 var (
@@ -88,6 +89,7 @@ type IDSnakeGenerator struct {
 
 func (n *IDSnakeGenerator) Next() int64 {
 	n.mu.Lock()
+	defer n.mu.Unlock()
 
 	now := time.Since(n.epoch).Nanoseconds() / defaultTimeUnit
 
@@ -98,7 +100,9 @@ func (n *IDSnakeGenerator) Next() int64 {
 		if backwards < MaxBackwardMs {
 			time.Sleep(time.Duration(backwards))
 		} else {
-			log.Fatalf("clock is moving backwards. Rejecting requests until %d.", n.time)
+			msg := fmt.Sprintf("clock is moving backwards. Rejecting requests until %d.", n.time)
+			log.Println(msg)
+			panic(msg)
 		}
 	}
 
@@ -120,7 +124,6 @@ func (n *IDSnakeGenerator) Next() int64 {
 		(n.node << n.nodeShift) |
 		(n.step)
 
-	n.mu.Unlock()
 	return id
 }
 

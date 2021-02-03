@@ -7,11 +7,11 @@ import (
 )
 
 type NodeAllocation interface {
-	Node(nodeMax int) int
+	Node(mode string, nodeMax int) int
 	DestroyNode(timeoutCtx context.Context)
 }
 
-var mu sync.Mutex
+var mu = &sync.Mutex{}
 var curNodeId = -1
 var idGenerators = map[string]IDGen{}
 var genFactory = NewIDSnakeGen
@@ -41,11 +41,11 @@ func ConfigCustom(mode string, nodeAlloc NodeAllocation, epoch int64, timeUnit U
 
 	if mode == "snake" {
 		nodeMax := -1 ^ (-1 << nodeBits)
-		curNodeId = nodeAlloc.Node(nodeMax)
+		curNodeId = nodeAlloc.Node(mode, nodeMax)
 		genFactory = NewIDSnakeGen
 	} else {
 		nodeMax := 10
-		curNodeId = nodeAlloc.Node(nodeMax)
+		curNodeId = nodeAlloc.Node(mode, nodeMax)
 		genFactory = NewID14Gen
 	}
 
@@ -57,13 +57,13 @@ func MultiIdGenerator(gen string) IDGen {
 		return idGen
 	}
 	mu.Lock()
+	defer mu.Unlock()
+
 	if idGen, ok := idGenerators[gen]; ok {
-		mu.Unlock()
 		return idGen
 	}
 	idGen, _ := genFactory(curNodeId)
 
 	idGenerators[gen] = idGen
-	mu.Unlock()
 	return idGen
 }

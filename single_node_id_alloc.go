@@ -14,7 +14,7 @@ func init() {
 type singleNodeIdAllocation struct {
 }
 
-func (alloc *singleNodeIdAllocation) Node(nodeMax int) int {
+func (alloc *singleNodeIdAllocation) Node(mode string, nodeMax int) int {
 	return rand.Intn(nodeMax)
 }
 

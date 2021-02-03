@@ -67,7 +67,7 @@ func BenchmarkIDSnakeGenerator_Next(b *testing.B) {
 }
 
 func TestParse2(t *testing.T) {
-	idNum := Parse(100632443644096)
+	idNum := Parse(135298569982080)
 	println(fmt.Sprintf("%+v", idNum))
 	println(idNum.time(1546272000))
 }
