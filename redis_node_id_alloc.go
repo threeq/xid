@@ -138,5 +138,5 @@ func NewNodeAllocationRedis(redisAddr, redisPwd string) *redisNodeIdAllocation {
 }
 
 func nodeKey(id int) string {
-	return "node-" + string(id)
+	return fmt.Sprintf("node-%d", id)
 }
