@@ -77,11 +77,9 @@ func GetIDS(gen string, num int64) []int64 {
 		num = MaxBatchNum
 	}
 	idGen := MultiIdGenerator(gen)
-	var ids []int64
-
-	for num > 0 {
-		num--
-		ids = append(ids, idGen.Next())
+	var ids = make([]int64, num)
+	for i := range ids {
+		ids[i] = idGen.Next()
 	}
 
 	return ids
