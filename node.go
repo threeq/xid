@@ -11,6 +11,9 @@ type NodeAllocation interface {
 	DestroyNode(timeoutCtx context.Context)
 }
 
+// MaxBatchNum 最大批量生成数
+const MaxBatchNum = 1000
+
 var mu = &sync.Mutex{}
 var curNodeId = -1
 var idGenerators = map[string]IDGen{}
@@ -66,4 +69,20 @@ func MultiIdGenerator(gen string) IDGen {
 
 	idGenerators[gen] = idGen
 	return idGen
+}
+
+// GetIDS 获取多个ID
+func GetIDS(gen string, num int) []int64 {
+	if num > MaxBatchNum {
+		num = MaxBatchNum
+	}
+	if num < 1 {
+		num = 1
+	}
+	idGen := MultiIdGenerator(gen)
+	var ids = make([]int64, num)
+	for i:=0;i<num; i++ {
+		ids[i] = idGen.Next()
+	}
+	return ids
 }
