@@ -72,15 +72,17 @@ func MultiIdGenerator(gen string) IDGen {
 }
 
 // GetIDS 获取多个ID
-func GetIDS(gen string, num int64) []int64 {
+func GetIDS(gen string, num int) []int64 {
 	if num > MaxBatchNum {
 		num = MaxBatchNum
 	}
+	if num < 1 {
+		num = 1
+	}
 	idGen := MultiIdGenerator(gen)
 	var ids = make([]int64, num)
-	for i := range ids {
+	for i:=0;i<num; i++ {
 		ids[i] = idGen.Next()
 	}
-
 	return ids
 }

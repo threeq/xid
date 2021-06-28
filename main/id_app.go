@@ -8,9 +8,9 @@ import (
 )
 
 type Response struct {
-	Code int `json:"code"`
-	Message string `json:"message"`
-	Data interface{} `json:"data"`
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
 func newIDApp(basePath string) http.Handler {
@@ -31,10 +31,18 @@ func newIDApp(basePath string) http.Handler {
 		numStr := c.Query("num")
 
 		var res Response
-		num, err := strconv.ParseInt(numStr, 10, 64)
+
+		num, err := strconv.Atoi(numStr)
 		if err != nil {
 			res.Code = 422
 			res.Message = err.Error()
+			c.JSON(http.StatusOK, res)
+
+			return
+		}
+		if num < 1 {
+			res.Code = 422
+			res.Message = "num最小值应为1"
 			c.JSON(http.StatusOK, res)
 
 			return
