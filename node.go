@@ -47,7 +47,7 @@ func ConfigCustom(mode string, nodeAlloc NodeAllocation, epoch int64, timeUnit U
 		curNodeId = nodeAlloc.Node(mode, nodeMax)
 		genFactory = NewIDSnakeGen
 	} else {
-		nodeMax := 10
+		nodeMax := 9
 		curNodeId = nodeAlloc.Node(mode, nodeMax)
 		genFactory = NewID14Gen
 	}
