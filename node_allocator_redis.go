@@ -2,20 +2,16 @@ package xid
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"github.com/go-redis/redis"
 	"log"
 	"math/rand"
 	"time"
+
+	"github.com/go-redis/redis"
 )
 
 type UnlockFunc func()
 
-const LockKey = "Rds_Xid_Hash_Key_Lock"
-const LockKeyTimeoutMs = 3 * 1000 // 3 秒
-const LockKeyRetryTimes = 100     // 100 次
-const RdsXidNodesHash = "Rds_Xid_Node_Key_"
 const NodeIdRefreshTImeSecond = 6 // 3 秒
 
 type redisNodeIdAllocation struct {
@@ -28,53 +24,58 @@ type redisNodeIdAllocation struct {
 	canceler context.CancelFunc
 }
 
-func (alloc *redisNodeIdAllocation) Node(mode string, nodeMax int) int {
+func (alloc *redisNodeIdAllocation) Node(nodeMax int) int {
+	defer func() {
+		if alloc.nodeId != -1 {
+			log.Println("当前节点 ID：", alloc.nodeId)
+		}
+	}()
+
 	if alloc.nodeId >= 0 && alloc.nodeId <= nodeMax {
 		return alloc.nodeId
 	}
 
-	//alloc.salt = uuid.NewV4().String()
-	alloc.rdsXidNodesHash = RdsXidNodesHash + mode
 	nodeCount := nodeMax + 1
 	// 为了尽量减少冲突，先随机获取一次 nodeId，不过失败在再逐个尝试
-	rand.Seed(time.Now().UnixNano())
-	startNodeId := rand.Intn(nodeCount)
-	r := alloc.rds.HSetNX(alloc.rdsXidNodesHash, nodeKey(startNodeId), time.Now().Unix())
+	random := rand.New(rand.NewSource(time.Now().UnixNano()))
+	startNodeId := random.Intn(nodeCount)
+	now := time.Now().UnixNano()
+	r := alloc.rds.HSetNX(alloc.rdsXidNodesHash, nodeKey(startNodeId), now)
+	exist, _ := alloc.rds.HGet(alloc.rdsXidNodesHash, nodeKey(startNodeId)).Int64()
 	if r.Val() {
 		alloc.nodeId = startNodeId
 		alloc.capture()
 		return alloc.nodeId
+	} else if (now-exist)/1e9 > NodeIdRefreshTImeSecond*10 {
+		// 有可能是上次的节点没有释放，这里再次尝试获取
+		alloc.rds.HDel(alloc.rdsXidNodesHash, nodeKey(startNodeId))
+		r = alloc.rds.HSetNX(alloc.rdsXidNodesHash, nodeKey(startNodeId), time.Now().UnixNano())
+		if r.Val() {
+			alloc.nodeId = startNodeId
+			alloc.capture()
+			return alloc.nodeId
+		}
 	}
 
 	log.Println("逐个尝试获取未使用 nodeId")
 	tryNodeId := (startNodeId + 1) % nodeCount
-	for ; tryNodeId != startNodeId; {
-
-		// 多个节点并发控制
-		// 这里采用 redis setnx 方式实现简单分布式锁，
-		// 这里是在服务器启动时才会获取一次，并发量不会很大
-		unlock, err := lock(alloc.rds, LockKey, LockKeyTimeoutMs, LockKeyRetryTimes)
-		if err != nil {
-			panic(err)
-		}
+	for tryNodeId != startNodeId {
 		exist, _ := alloc.rds.HGet(alloc.rdsXidNodesHash, nodeKey(tryNodeId)).Int64()
 		now := time.Now().Unix()
 		log.Println("check id ", now-exist, tryNodeId)
-		if (now - exist) > NodeIdRefreshTImeSecond*10 {
+		if (now-exist)/1e9 > NodeIdRefreshTImeSecond*10 {
 			alloc.rds.HDel(alloc.rdsXidNodesHash, nodeKey(tryNodeId))
-			r := alloc.rds.HSetNX(alloc.rdsXidNodesHash, nodeKey(tryNodeId), time.Now().Unix())
+			r := alloc.rds.HSetNX(alloc.rdsXidNodesHash, nodeKey(tryNodeId), time.Now().UnixNano())
 			if r.Val() {
-				unlock()
 				alloc.nodeId = tryNodeId
 				alloc.capture()
 				return alloc.nodeId
 			}
 		}
-		unlock()
 
 		tryNodeId = (tryNodeId + 1) % nodeCount
 	}
-	panic(errors.New(fmt.Sprintf("all %d nodes are in use", nodeCount)))
+	panic("all nodes are in use")
 }
 
 func (alloc *redisNodeIdAllocation) DestroyNode(timeoutCtx context.Context) {
@@ -96,15 +97,15 @@ func refreshNodeStatus(ctx context.Context, alloc *redisNodeIdAllocation, nodeId
 
 	for {
 		select {
-		case _, _ = <-t.C:
-			now := time.Now().Unix()
+		case <-t.C:
+			now := time.Now().UnixNano()
 			log.Printf("refresh id [%d] activity time to %d", nodeId, now)
 			client.HSet(alloc.rdsXidNodesHash, nodeKey(nodeId), now)
 		case <-ctx.Done():
 			t.Stop()
 			client.HDel(alloc.rdsXidNodesHash, nodeKey(nodeId))
 			_ = client.Close()
-			log.Println(fmt.Sprintf("delete node id %d", nodeId))
+			log.Printf("delete node id %d", nodeId)
 			done <- 1
 			return
 		}
@@ -129,11 +130,12 @@ func NewNodeAllocationRedis(redisAddr, redisPwd string) *redisNodeIdAllocation {
 	done := make(chan interface{})
 
 	return &redisNodeIdAllocation{
-		rds:      rds,
-		nodeId:   -1,
-		ctx:      ctx,
-		canceler: canceler,
-		shutdown: done,
+		rds:             rds,
+		rdsXidNodesHash: defaultCfg.redisXidNodesHashKey,
+		nodeId:          -1,
+		ctx:             ctx,
+		canceler:        canceler,
+		shutdown:        done,
 	}
 }
 

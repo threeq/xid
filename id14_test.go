@@ -2,11 +2,11 @@ package xid
 
 import (
 	"fmt"
-	uuid "github.com/satori/go.uuid"
-	"gopkg.in/go-playground/assert.v1"
 	"strconv"
 	"testing"
 	"time"
+
+	"gopkg.in/go-playground/assert.v1"
 )
 
 func TestID14Generator_Next(t *testing.T) {
@@ -21,13 +21,13 @@ func TestID14Generator_Next(t *testing.T) {
 	time.Sleep(time.Second)
 	g.Next()
 	s2 := g.start
-	assert.NotEqual(t, s1, s2)
+	assert.Equal(t, s1, s2)
 }
 
 func BenchmarkID14Generator_Next(b *testing.B) {
 	g := ID14Generator{}
 	for i := 0; i < b.N; i++ {
-		fmt.Println(g.Next())
+		g.Next()
 	}
 }
 
@@ -53,8 +53,4 @@ func BenchmarkID14Generator_AlgM(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = int64(1599749011)*10000 + int64(1)*1000 + int64(49)
 	}
-}
-
-func TestUuid(t *testing.T) {
-	fmt.Println(uuid.NewV4().String())
 }

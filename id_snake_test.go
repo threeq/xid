@@ -1,7 +1,6 @@
 package xid
 
 import (
-	"fmt"
 	"log"
 	"reflect"
 	"testing"
@@ -10,7 +9,7 @@ import (
 
 func TestParse(t *testing.T) {
 
-	var IdNode, _ = NewIDSnakeGen(1)
+	var idGen, _ = NewIDSnakeGen(1, 0, 4, 16, Second)
 
 	type args struct {
 		id int64
@@ -20,10 +19,10 @@ func TestParse(t *testing.T) {
 		args args
 		want *SnakeID
 	}{
-		{"ok1", args{IdNode.Next()}, &SnakeID{node: 1}},
-		{"ok2", args{IdNode.Next()}, &SnakeID{node: 1}},
-		{"ok3", args{IdNode.Next()}, &SnakeID{node: 1}},
-		{"ok4", args{IdNode.Next()}, &SnakeID{node: 1}},
+		{"ok1", args{idGen.Next()}, &SnakeID{node: 1}},
+		{"ok2", args{idGen.Next()}, &SnakeID{node: 1}},
+		{"ok3", args{idGen.Next()}, &SnakeID{node: 1}},
+		{"ok4", args{idGen.Next()}, &SnakeID{node: 1}},
 	}
 
 	step := 0
@@ -33,7 +32,7 @@ func TestParse(t *testing.T) {
 			tt.want.step = int64(step)
 			tt.want.second = time.Now().UnixNano() / Second
 
-			if got := Parse(tt.args.id); !reflect.DeepEqual(got, tt.want) {
+			if got := idGen.Parse(tt.args.id); !reflect.DeepEqual(got, tt.want) {
 				t.Error(got.time(0))
 				t.Errorf("Parse() = %v, want %v", got, tt.want)
 			}
@@ -43,8 +42,8 @@ func TestParse(t *testing.T) {
 }
 
 func TestIDSnakeGenerator_Next(t *testing.T) {
-	defaultEpoch = int64(time.Now().Nanosecond() / 1000000)
-	idGen, _ := NewIDSnakeGen(0)
+	startTime := int64(time.Now().Nanosecond() / int(Millisecond))
+	idGen, _ := NewIDSnakeGen(1, startTime, 5, 6, Millisecond)
 
 	id := idGen.Next()
 	log.Println(id)
@@ -52,22 +51,16 @@ func TestIDSnakeGenerator_Next(t *testing.T) {
 	log.Println("1011011010110001100001011111000000101101100000000000")
 	log.Println(len("1011011010110001100001011111000000101101100000000000"))
 
-	log.Println(Parse(id).time(0))
+	log.Println(idGen.Parse(id).time(0))
 }
 
 func BenchmarkIDSnakeGenerator_Next(b *testing.B) {
-	idGen, _ := NewIDSnakeGen(0)
+	idGen, _ := NewIDSnakeGen(0, 0, 5, 6, Millisecond)
 
 	for i := 0; i < b.N; i++ {
 		id := idGen.Next()
-		if id<3 {
+		if id < 3 {
 			b.Fatalf("error")
 		}
 	}
-}
-
-func TestParse2(t *testing.T) {
-	idNum := Parse(135298569982080)
-	println(fmt.Sprintf("%+v", idNum))
-	println(idNum.time(1546272000))
 }

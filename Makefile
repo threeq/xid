@@ -18,7 +18,7 @@ BINARY_LINUX=$(BINARY_NAME)_linux
 BINARY_MAC=$(BINARY_NAME)_mac
 BINARY_WIN=$(BINARY_NAME)_win.exe
 OUTPUT=out
-SRC=github.com/threeq/xid/main
+SRC=github.com/threeq/xid/server
 
 .PHONY: all
 all: clean test build-all

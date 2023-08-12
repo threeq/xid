@@ -94,3 +94,5 @@ fabric.properties
 *.iml
 out
 gen
+bin/
+target/

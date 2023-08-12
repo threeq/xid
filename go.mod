@@ -1,16 +1,36 @@
 module github.com/threeq/xid
 
-go 1.13
+go 1.20
 
 require (
-	github.com/gin-gonic/gin v1.9.1
-	github.com/go-redis/redis v6.15.5+incompatible
-	github.com/onsi/ginkgo v1.10.1 // indirect
-	github.com/onsi/gomega v1.7.0 // indirect
-	github.com/satori/go.uuid v1.2.0
-	github.com/stretchr/testify v1.8.3
+	github.com/aceld/zinx v1.2.0
+	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/stretchr/testify v1.8.4
+	github.com/valyala/fasthttp v1.48.0
 	gopkg.in/go-playground/assert.v1 v1.2.1
-	gopkg.in/yaml.v2 v2.2.8 // indirect
+)
+
+require (
+	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/klauspost/compress v1.16.3 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
+	github.com/klauspost/reedsolomon v1.11.8 // indirect
+	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/onsi/gomega v1.27.10 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/templexxx/cpufeat v0.0.0-20180724012125-cef66df7f161 // indirect
+	github.com/templexxx/xor v0.0.0-20191217153810-f85b25db303b // indirect
+	github.com/tjfoc/gmsm v1.4.1 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/xtaci/kcp-go v5.4.20+incompatible // indirect
+	github.com/xtaci/lossyconn v0.0.0-20200209145036-adba10fffc37 // indirect
+	golang.org/x/crypto v0.9.0 // indirect
+	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 // demo:

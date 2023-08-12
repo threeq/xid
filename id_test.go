@@ -22,11 +22,12 @@ func TestGetIDS(t *testing.T) {
 		{"10000", args{"", 10000}, 1000},
 	}
 
-	Config("snake", NewNodeAllocationSingle())
+	Options(NodeAlloc(NewNodeAllocationSingle()))
+	Init()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := GetIDS(tt.args.gen, tt.args.num)
+			got := GetIDS(ID_Snake, tt.args.gen, tt.args.num)
 			if len(got) != tt.want && got[0] > 0 {
 				t.Errorf("GetIDS() = %v, want %v", got, tt.want)
 			}
