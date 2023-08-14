@@ -1,4 +1,4 @@
-FROM golang:1.14 AS builder
+FROM golang:1.21 AS builder
 RUN mkdir /app
 WORKDIR /app
 COPY . .
@@ -9,6 +9,7 @@ RUN mkdir /app
 WORKDIR /app
 COPY --from=builder /app/bin/xid_linux ./xid
 
-EXPOSE 8080
+EXPOSE 8888
+EXPOSE 8999
 
 ENTRYPOINT ["/app/xid"]

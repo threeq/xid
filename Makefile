@@ -1,5 +1,5 @@
 # These are the values we want to pass for VERSION  and BUILD
-VERSION=v1.3.1
+VERSION=v2.0.0
 BUILD=`date +%FT%T%z`
 # Setup the -Idflags options for go build here,interpolate the variable values
 LDFLAGS=-ldflags "-s -w -X main.Version=${VERSION} -X main.Build=${BUILD}"
