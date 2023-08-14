@@ -40,7 +40,7 @@ clean:
 
 build-linux:
 	GOPROXY=https://goproxy.io,direct CGO_ENABLED=0 GOOS=linux   GOARCH=amd64 $(GOBUILD) -o $(BIN_PATH)/$(BINARY_LINUX) -v $(SRC)
-	upx -9 $(BIN_PATH)/$(BINARY_LINUX)
+	./bin/upx_4.1.0_linux -9 $(BIN_PATH)/$(BINARY_LINUX)
 build-mac:
 	GOPROXY=https://goproxy.io,direct CGO_ENABLED=0 GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o $(BIN_PATH)/$(BINARY_MAC)   -v $(SRC)
 	upx -9 $(BIN_PATH)/$(BINARY_MAC)
