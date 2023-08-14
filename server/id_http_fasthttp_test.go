@@ -11,9 +11,10 @@ import (
 	"github.com/threeq/xid"
 )
 
-//func init() {
-//	xid.Init()
-//}
+func init() {
+	xid.Options(xid.RunTypes("snake+id14"))
+	xid.Init()
+}
 
 func idHttpFunc(writer http.ResponseWriter, request *http.Request) {
 

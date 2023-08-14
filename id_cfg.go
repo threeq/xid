@@ -128,10 +128,10 @@ func RedisXidNodesHashKey(key string) Option {
 	}
 }
 
-func RunTypes(mode string) Option {
+func RunTypes(types string) Option {
 	return func(o *idGeneratorsCfg) {
 		o.types = []IdType{}
-		types := strings.Split(mode, "+")
+		types := strings.Split(types, "+")
 		for _, t := range types {
 			switch t {
 			case "snake":

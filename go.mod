@@ -1,6 +1,6 @@
 module github.com/threeq/xid
 
-go 1.20
+go 1.21
 
 require (
 	github.com/aceld/zinx v1.2.0
@@ -37,6 +37,7 @@ require (
 //      replace golang.org/x/crypto => github.com/golang/crypto latest
 
 replace (
+	github.com/aceld/zinx => github.com/threeq/zinx v0.0.0-20230814032846-be85c35c474a
 	golang.org/x/crypto => github.com/golang/crypto v0.0.0-20190911031432-227b76d455e7
 	golang.org/x/net => github.com/golang/net v0.0.0-20190918130420-a8b05e9114ab
 	golang.org/x/sync => github.com/golang/sync v0.0.0-20190911185100-cd5d95a43a6e

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/valyala/fasthttp"
 	"log"
 	"net/http"
 	"os"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/threeq/xid"
-	"github.com/valyala/fasthttp"
 )
 
 var (
@@ -31,7 +31,7 @@ var (
 	stepBits     *uint
 )
 
-func main() {
+func init() {
 	types = flag.String("types", "snake", "id 生成模式【snake/id14】，同时支持多个用+分割")
 	protocols = flag.String("protocols", "http", "服务协议【http/tcp】，同时支持多个用+分割")
 	basePath = flag.String("path", "/xid", "访问路径")
@@ -48,6 +48,10 @@ func main() {
 	timeUnitDesc = flag.String("time-unit", "s", "时间单位: s,ms,10ms,100ms")
 	nodeBits = flag.Uint("node-bits", 4, "机器长度")
 	stepBits = flag.Uint("step-bits", 16, "计数器长度")
+}
+
+func main() {
+
 	flag.Parse()
 
 	log.Println("支持的 ID 类型：", *types)

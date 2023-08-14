@@ -2,7 +2,7 @@
 VERSION=v1.3.1
 BUILD=`date +%FT%T%z`
 # Setup the -Idflags options for go build here,interpolate the variable values
-LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Build=${BUILD}"
+LDFLAGS=-ldflags "-s -w -X main.Version=${VERSION} -X main.Build=${BUILD}"
 
 # Go parameters
 GOCMD=go
@@ -40,8 +40,10 @@ clean:
 
 build-linux:
 	GOPROXY=https://goproxy.io,direct CGO_ENABLED=0 GOOS=linux   GOARCH=amd64 $(GOBUILD) -o $(BIN_PATH)/$(BINARY_LINUX) -v $(SRC)
+	upx -9 $(BIN_PATH)/$(BINARY_LINUX)
 build-mac:
 	GOPROXY=https://goproxy.io,direct CGO_ENABLED=0 GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o $(BIN_PATH)/$(BINARY_MAC)   -v $(SRC)
+	upx -9 $(BIN_PATH)/$(BINARY_MAC)
 build-win:
 	GOPROXY=https://goproxy.io,direct CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BIN_PATH)/$(BINARY_WIN)   -v $(SRC)
 
