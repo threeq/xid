@@ -1,6 +1,6 @@
 module github.com/threeq/xid
 
-go 1.21
+go 1.24
 
 require (
 	github.com/aceld/zinx v1.2.0
@@ -14,7 +14,7 @@ require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
-	github.com/klauspost/compress v1.16.3 // indirect
+	github.com/klauspost/compress v1.18.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/klauspost/reedsolomon v1.11.8 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
